@@ -1607,10 +1607,7 @@ TEST_F(FormatTest, FormatShortBracedStatements) {
   AllowSimpleBracedStatements.AllowShortIfStatementsOnASingleLine =
       FormatStyle::SIS_Never;
   verifyFormat("if (true) {}", AllowSimpleBracedStatements);
-  verifyFormat("if (true) {\n"
-               "  f();\n"
-               "}",
-               AllowSimpleBracedStatements);
+  verifyFormat("if (true) { f(); }", AllowSimpleBracedStatements);
   verifyFormat("if (true) {\n"
                "  f();\n"
                "} else {\n"
@@ -1618,10 +1615,7 @@ TEST_F(FormatTest, FormatShortBracedStatements) {
                "}",
                AllowSimpleBracedStatements);
   verifyFormat("MYIF (true) {}", AllowSimpleBracedStatements);
-  verifyFormat("MYIF (true) {\n"
-               "  f();\n"
-               "}",
-               AllowSimpleBracedStatements);
+  verifyFormat("MYIF (true) { f(); }", AllowSimpleBracedStatements);
   verifyFormat("MYIF (true) {\n"
                "  f();\n"
                "} else {\n"
@@ -1631,19 +1625,11 @@ TEST_F(FormatTest, FormatShortBracedStatements) {
 
   AllowSimpleBracedStatements.AllowShortLoopsOnASingleLine = false;
   verifyFormat("while (true) {}", AllowSimpleBracedStatements);
-  verifyFormat("while (true) {\n"
-               "  f();\n"
-               "}",
-               AllowSimpleBracedStatements);
+  verifyFormat("while (true) { f(); }", AllowSimpleBracedStatements);
   verifyFormat("for (;;) {}", AllowSimpleBracedStatements);
-  verifyFormat("for (;;) {\n"
-               "  f();\n"
-               "}",
-               AllowSimpleBracedStatements);
+  verifyFormat("for (;;) { f(); }", AllowSimpleBracedStatements);
   verifyFormat("BOOST_FOREACH (int v, vec) {}", AllowSimpleBracedStatements);
-  verifyFormat("BOOST_FOREACH (int v, vec) {\n"
-               "  f();\n"
-               "}",
+  verifyFormat("BOOST_FOREACH (int v, vec) { f(); }",
                AllowSimpleBracedStatements);
 
   AllowSimpleBracedStatements.AllowShortIfStatementsOnASingleLine =
@@ -2432,12 +2418,8 @@ TEST_F(FormatTest, ForEachLoops) {
                "    int j = 1;\n"
                "  Q_FOREACH (int &v, vec)\n"
                "    v *= 2;\n"
-               "  for (;;) {\n"
-               "    int j = 1;\n"
-               "  }\n"
-               "  Q_FOREACH (int &v, vec) {\n"
-               "    int j = 1;\n"
-               "  }\n"
+               "  for (;;) { int j = 1; }\n"
+               "  Q_FOREACH (int &v, vec) { int j = 1; }\n"
                "}",
                ShortBlocks);
 
@@ -15564,7 +15546,19 @@ TEST_F(FormatTest, MergeShortFunctionBody) {
   Style.BraceWrapping.AfterFunction = true;
 
   verifyFormat("int foo()\n"
-               "{ return 1; }",
+               "{\n"
+               "  return 1;\n"
+               "}\n",
+               Style);
+  verifyFormat("int foo()\n"
+               "{\n"
+               "  if (true) { return 42; };\n"
+               "}\n",
+               Style);
+  verifyFormat("int foo()\n"
+               "{\n"
+               "  static constexpr auto lambda = []() -> int { return 42; };\n"
+               "}\n",
                Style);
 }
 
@@ -15913,11 +15907,15 @@ TEST_F(FormatTest, AllowShortRecordOnASingleLine) {
 
   Style.AllowShortRecordOnASingleLine = FormatStyle::SRS_Never;
   verifyFormat("class foo\n"
-               "{ int i; };",
+               "{\n"
+               "  int i;\n"
+               "};",
                Style);
   Style.AllowShortRecordOnASingleLine = FormatStyle::SRS_Empty;
   verifyFormat("class foo\n"
-               "{ int i; };",
+               "{\n"
+               "  int i;\n"
+               "};",
                Style);
   Style.AllowShortRecordOnASingleLine = FormatStyle::SRS_Always;
   verifyFormat("class foo\n"
