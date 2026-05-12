@@ -15542,6 +15542,7 @@ TEST_F(FormatTest, MergeShortFunctionBody) {
   auto Style = getLLVMStyle();
   Style.AllowShortFunctionsOnASingleLine = FormatStyle::ShortFunctionStyle();
   Style.AllowShortBlocksOnASingleLine = FormatStyle::SBS_Always;
+  Style.AllowShortIfStatementsOnASingleLine = FormatStyle::SIS_WithoutElse;
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
   Style.BraceWrapping.AfterFunction = true;
 
