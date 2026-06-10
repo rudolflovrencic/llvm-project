@@ -162,12 +162,6 @@ TEST(ConfigParseTest, ParsesConfigurationBools) {
   CHECK_PARSE_BOOL(AllowAllArgumentsOnNextLine);
   CHECK_PARSE_BOOL(AllowAllParametersOfDeclarationOnNextLine);
   CHECK_PARSE_BOOL(AllowBreakBeforeQtProperty);
-  CHECK_PARSE_BOOL(AllowShortCaseExpressionOnASingleLine);
-  CHECK_PARSE_BOOL(AllowShortCaseLabelsOnASingleLine);
-  CHECK_PARSE_BOOL(AllowShortCompoundRequirementOnASingleLine);
-  CHECK_PARSE_BOOL(AllowShortEnumsOnASingleLine);
-  CHECK_PARSE_BOOL(AllowShortLoopsOnASingleLine);
-  CHECK_PARSE_BOOL(AllowShortNamespacesOnASingleLine);
   CHECK_PARSE_BOOL(BinPackLongBracedList);
   CHECK_PARSE_BOOL(BreakAdjacentStringLiterals);
   CHECK_PARSE_BOOL(BreakAfterJavaFieldAnnotations);
@@ -780,6 +774,105 @@ TEST(ConfigParseTest, ParsesConfiguration) {
               AllowShortRecordOnASingleLine, FormatStyle::SRS_Empty);
   CHECK_PARSE("AllowShortRecordOnASingleLine: Always",
               AllowShortRecordOnASingleLine, FormatStyle::SRS_Always);
+
+  Style.AllowShortCaseExpressionOnASingleLine = FormatStyle::SCES_Always;
+  CHECK_PARSE("AllowShortCaseExpressionOnASingleLine: Never",
+              AllowShortCaseExpressionOnASingleLine, FormatStyle::SCES_Never);
+  CHECK_PARSE("AllowShortCaseExpressionOnASingleLine: EmptyAndAttached",
+              AllowShortCaseExpressionOnASingleLine,
+              FormatStyle::SCES_EmptyAndAttached);
+  CHECK_PARSE("AllowShortCaseExpressionOnASingleLine: Empty",
+              AllowShortCaseExpressionOnASingleLine, FormatStyle::SCES_Empty);
+  CHECK_PARSE("AllowShortCaseExpressionOnASingleLine: Always",
+              AllowShortCaseExpressionOnASingleLine, FormatStyle::SCES_Always);
+  // For backward compatibility:
+  CHECK_PARSE("AllowShortCaseExpressionOnASingleLine: false",
+              AllowShortCaseExpressionOnASingleLine, FormatStyle::SCES_Never);
+  CHECK_PARSE("AllowShortCaseExpressionOnASingleLine: true",
+              AllowShortCaseExpressionOnASingleLine, FormatStyle::SCES_Always);
+
+  Style.AllowShortCaseLabelsOnASingleLine = FormatStyle::SCLS_Always;
+  CHECK_PARSE("AllowShortCaseLabelsOnASingleLine: Never",
+              AllowShortCaseLabelsOnASingleLine, FormatStyle::SCLS_Never);
+  CHECK_PARSE("AllowShortCaseLabelsOnASingleLine: EmptyAndAttached",
+              AllowShortCaseLabelsOnASingleLine,
+              FormatStyle::SCLS_EmptyAndAttached);
+  CHECK_PARSE("AllowShortCaseLabelsOnASingleLine: Empty",
+              AllowShortCaseLabelsOnASingleLine, FormatStyle::SCLS_Empty);
+  CHECK_PARSE("AllowShortCaseLabelsOnASingleLine: Always",
+              AllowShortCaseLabelsOnASingleLine, FormatStyle::SCLS_Always);
+  // For backward compatibility:
+  CHECK_PARSE("AllowShortCaseLabelsOnASingleLine: false",
+              AllowShortCaseLabelsOnASingleLine, FormatStyle::SCLS_Never);
+  CHECK_PARSE("AllowShortCaseLabelsOnASingleLine: true",
+              AllowShortCaseLabelsOnASingleLine, FormatStyle::SCLS_Always);
+
+  Style.AllowShortCompoundRequirementOnASingleLine = FormatStyle::SCRS_Always;
+  CHECK_PARSE("AllowShortCompoundRequirementOnASingleLine: Never",
+              AllowShortCompoundRequirementOnASingleLine,
+              FormatStyle::SCRS_Never);
+  CHECK_PARSE("AllowShortCompoundRequirementOnASingleLine: EmptyAndAttached",
+              AllowShortCompoundRequirementOnASingleLine,
+              FormatStyle::SCRS_EmptyAndAttached);
+  CHECK_PARSE("AllowShortCompoundRequirementOnASingleLine: Empty",
+              AllowShortCompoundRequirementOnASingleLine,
+              FormatStyle::SCRS_Empty);
+  CHECK_PARSE("AllowShortCompoundRequirementOnASingleLine: Always",
+              AllowShortCompoundRequirementOnASingleLine,
+              FormatStyle::SCRS_Always);
+  // For backward compatibility:
+  CHECK_PARSE("AllowShortCompoundRequirementOnASingleLine: false",
+              AllowShortCompoundRequirementOnASingleLine,
+              FormatStyle::SCRS_Never);
+  CHECK_PARSE("AllowShortCompoundRequirementOnASingleLine: true",
+              AllowShortCompoundRequirementOnASingleLine,
+              FormatStyle::SCRS_Always);
+
+  Style.AllowShortEnumsOnASingleLine = FormatStyle::SES_Always;
+  CHECK_PARSE("AllowShortEnumsOnASingleLine: Never",
+              AllowShortEnumsOnASingleLine, FormatStyle::SES_Never);
+  CHECK_PARSE("AllowShortEnumsOnASingleLine: EmptyAndAttached",
+              AllowShortEnumsOnASingleLine, FormatStyle::SES_EmptyAndAttached);
+  CHECK_PARSE("AllowShortEnumsOnASingleLine: Empty", AllowShortEnumsOnASingleLine,
+              FormatStyle::SES_Empty);
+  CHECK_PARSE("AllowShortEnumsOnASingleLine: Always",
+              AllowShortEnumsOnASingleLine, FormatStyle::SES_Always);
+  // For backward compatibility:
+  CHECK_PARSE("AllowShortEnumsOnASingleLine: false", AllowShortEnumsOnASingleLine,
+              FormatStyle::SES_Never);
+  CHECK_PARSE("AllowShortEnumsOnASingleLine: true", AllowShortEnumsOnASingleLine,
+              FormatStyle::SES_Always);
+
+  Style.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Always;
+  CHECK_PARSE("AllowShortLoopsOnASingleLine: Never",
+              AllowShortLoopsOnASingleLine, FormatStyle::SLPS_Never);
+  CHECK_PARSE("AllowShortLoopsOnASingleLine: EmptyAndAttached",
+              AllowShortLoopsOnASingleLine, FormatStyle::SLPS_EmptyAndAttached);
+  CHECK_PARSE("AllowShortLoopsOnASingleLine: Empty", AllowShortLoopsOnASingleLine,
+              FormatStyle::SLPS_Empty);
+  CHECK_PARSE("AllowShortLoopsOnASingleLine: Always",
+              AllowShortLoopsOnASingleLine, FormatStyle::SLPS_Always);
+  // For backward compatibility:
+  CHECK_PARSE("AllowShortLoopsOnASingleLine: false", AllowShortLoopsOnASingleLine,
+              FormatStyle::SLPS_Never);
+  CHECK_PARSE("AllowShortLoopsOnASingleLine: true", AllowShortLoopsOnASingleLine,
+              FormatStyle::SLPS_Always);
+
+  Style.AllowShortNamespacesOnASingleLine = FormatStyle::SNS_Always;
+  CHECK_PARSE("AllowShortNamespacesOnASingleLine: Never",
+              AllowShortNamespacesOnASingleLine, FormatStyle::SNS_Never);
+  CHECK_PARSE("AllowShortNamespacesOnASingleLine: EmptyAndAttached",
+              AllowShortNamespacesOnASingleLine,
+              FormatStyle::SNS_EmptyAndAttached);
+  CHECK_PARSE("AllowShortNamespacesOnASingleLine: Empty",
+              AllowShortNamespacesOnASingleLine, FormatStyle::SNS_Empty);
+  CHECK_PARSE("AllowShortNamespacesOnASingleLine: Always",
+              AllowShortNamespacesOnASingleLine, FormatStyle::SNS_Always);
+  // For backward compatibility:
+  CHECK_PARSE("AllowShortNamespacesOnASingleLine: false",
+              AllowShortNamespacesOnASingleLine, FormatStyle::SNS_Never);
+  CHECK_PARSE("AllowShortNamespacesOnASingleLine: true",
+              AllowShortNamespacesOnASingleLine, FormatStyle::SNS_Always);
 
   Style.SpaceAroundPointerQualifiers = FormatStyle::SAPQ_Both;
   CHECK_PARSE("SpaceAroundPointerQualifiers: Default",

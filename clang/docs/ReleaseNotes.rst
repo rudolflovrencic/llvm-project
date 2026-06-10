@@ -965,6 +965,14 @@ clang-format
 - Extend ``BreakBinaryOperations`` to accept a structured configuration with
   per-operator break rules and minimum chain length gating via ``PerOperator``.
 - Add ``AllowShortRecordOnASingleLine`` option and set it to ``EmptyAndAttached`` for LLVM style.
+- Convert ``AllowShortCaseExpressionOnASingleLine``,
+  ``AllowShortCaseLabelsOnASingleLine``,
+  ``AllowShortCompoundRequirementOnASingleLine``, ``AllowShortEnumsOnASingleLine``,
+  ``AllowShortLoopsOnASingleLine``, and ``AllowShortNamespacesOnASingleLine`` from
+  boolean options to enums with ``Never``, ``EmptyAndAttached``, ``Empty``, and
+  ``Always`` values, for consistency with ``AllowShortRecordOnASingleLine``. The
+  old boolean values keep working: ``false`` maps to ``Never`` and ``true`` maps
+  to ``Always``.
 - Add ``BreakFunctionDeclarationParameters`` option to always break before function
   declaration parameters.
 - Add ``EnumAssignments`` option to ``AlignConsecutiveAssignments`` for aligning

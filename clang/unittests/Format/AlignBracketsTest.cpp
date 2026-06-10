@@ -847,7 +847,7 @@ TEST_F(AlignBracketsTest, ParenthesesAndOperandAlignment) {
 
 TEST_F(AlignBracketsTest, BlockIndentAndNamespace) {
   auto Style = getLLVMStyleWithColumns(120);
-  Style.AllowShortNamespacesOnASingleLine = true;
+  Style.AllowShortNamespacesOnASingleLine = FormatStyle::SNS_Always;
   Style.BreakAfterOpenBracketFunction = true;
   Style.BreakAfterOpenBracketBracedList = true;
   Style.BreakBeforeCloseBracketFunction = true;

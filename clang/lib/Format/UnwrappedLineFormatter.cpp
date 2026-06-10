@@ -373,7 +373,9 @@ private:
     // FIXME: There are probably cases where we should use FirstNonComment
     // instead of TheLine->First.
 
-    if (Style.AllowShortNamespacesOnASingleLine &&
+    // ``tryMergeNamespace`` only merges non-empty single-statement namespaces,
+    // so ``Empty`` and ``EmptyAndAttached`` behave like ``Never`` here.
+    if (Style.AllowShortNamespacesOnASingleLine == FormatStyle::SNS_Always &&
         TheLine->First->is(tok::kw_namespace)) {
       const auto result = tryMergeNamespace(I, E, Limit);
       if (result > 0)
@@ -501,8 +503,15 @@ private:
       }
     }
 
+    // The opening brace of the constructs handled below is on the current
+    // line (attached), so the ``EmptyAndAttached`` and ``Empty`` enum values
+    // are equivalent here.
+    const bool IsEmptyBlock = NextLine.First->is(tok::r_brace);
+
     if (TheLine->First->is(TT_SwitchExpressionLabel)) {
-      return Style.AllowShortCaseExpressionOnASingleLine
+      // Switch labeled rules are never empty (a braced rule isn't merged), so
+      // ``Empty`` and ``EmptyAndAttached`` behave like ``Never`` here.
+      return Style.AllowShortCaseExpressionOnASingleLine == FormatStyle::SCES_Always
                  ? tryMergeShortCaseLabels(I, E, Limit)
                  : 0;
     }
@@ -511,9 +520,29 @@ private:
       bool ShouldMerge = false;
       // Try to merge records.
       if (TheLine->Last->is(TT_EnumLBrace)) {
-        ShouldMerge = Style.AllowShortEnumsOnASingleLine;
+        switch (Style.AllowShortEnumsOnASingleLine) {
+        case FormatStyle::SES_Never:
+          ShouldMerge = false;
+          break;
+        case FormatStyle::SES_Always:
+          ShouldMerge = true;
+          break;
+        default:
+          ShouldMerge = IsEmptyBlock;
+          break;
+        }
       } else if (TheLine->Last->is(TT_CompoundRequirementLBrace)) {
-        ShouldMerge = Style.AllowShortCompoundRequirementOnASingleLine;
+        switch (Style.AllowShortCompoundRequirementOnASingleLine) {
+        case FormatStyle::SCRS_Never:
+          ShouldMerge = false;
+          break;
+        case FormatStyle::SCRS_Always:
+          ShouldMerge = true;
+          break;
+        default:
+          ShouldMerge = IsEmptyBlock;
+          break;
+        }
       } else if (TheLine->Last->isOneOf(TT_ClassLBrace, TT_StructLBrace,
                                         TT_UnionLBrace) ||
                  (TheLine->Last->is(TT_RecordLBrace) && Style.isJava())) {
@@ -571,12 +600,16 @@ private:
     }
     if (TheLine->First->isOneOf(tok::kw_for, tok::kw_while, tok::kw_do,
                                 TT_ForEachMacro)) {
-      return Style.AllowShortLoopsOnASingleLine
+      // This merges braceless loop bodies; an empty braceless body is already
+      // merged during parsing, so only ``Always`` merges here.
+      return Style.AllowShortLoopsOnASingleLine == FormatStyle::SLPS_Always
                  ? tryMergeSimpleControlStatement(I, E, Limit)
                  : 0;
     }
     if (TheLine->First->isOneOf(tok::kw_case, tok::kw_default)) {
-      return Style.AllowShortCaseLabelsOnASingleLine
+      // Empty case labels are never merged, so ``Empty`` and
+      // ``EmptyAndAttached`` behave like ``Never`` here.
+      return Style.AllowShortCaseLabelsOnASingleLine == FormatStyle::SCLS_Always
                  ? tryMergeShortCaseLabels(I, E, Limit)
                  : 0;
     }
@@ -908,14 +941,14 @@ private:
         return 0;
       }
       if (!BracedBlocksAlwaysOnSingleLine &&
-          !Style.AllowShortLoopsOnASingleLine &&
+          Style.AllowShortLoopsOnASingleLine != FormatStyle::SLPS_Always &&
           Line.First->isOneOf(tok::kw_while, tok::kw_do, tok::kw_for,
                               TT_ForEachMacro) &&
           !Style.BraceWrapping.AfterControlStatement &&
           I[1]->First->isNot(tok::r_brace)) {
         return 0;
       }
-      if (!Style.AllowShortLoopsOnASingleLine &&
+      if (Style.AllowShortLoopsOnASingleLine != FormatStyle::SLPS_Always &&
           Line.First->isOneOf(tok::kw_while, tok::kw_do, tok::kw_for,
                               TT_ForEachMacro) &&
           Style.BraceWrapping.AfterControlStatement ==

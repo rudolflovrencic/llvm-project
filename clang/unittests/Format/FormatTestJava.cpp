@@ -715,7 +715,7 @@ TEST_F(FormatTestJava, ShortCaseExpression) {
                Style);
 
   Style.ColumnLimit = 80;
-  Style.AllowShortCaseExpressionOnASingleLine = false;
+  Style.AllowShortCaseExpressionOnASingleLine = FormatStyle::SCES_Never;
   Style.IndentCaseLabels = true;
   verifyFormat("i = switch (n) {\n"
                "  default /*comments*/ ->\n"
@@ -725,7 +725,7 @@ TEST_F(FormatTestJava, ShortCaseExpression) {
                "};",
                Style);
 
-  Style.AllowShortCaseExpressionOnASingleLine = true;
+  Style.AllowShortCaseExpressionOnASingleLine = FormatStyle::SCES_Always;
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
   Style.BraceWrapping.AfterCaseLabel = true;
   Style.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_Always;

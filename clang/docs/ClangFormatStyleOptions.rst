@@ -1862,71 +1862,178 @@ the configuration (without a prefix: ``Auto``).
 
 .. _AllowShortCaseExpressionOnASingleLine:
 
-**AllowShortCaseExpressionOnASingleLine** (``Boolean``) :versionbadge:`clang-format 19` :ref:`¶ <AllowShortCaseExpressionOnASingleLine>`
-  Whether to merge a short switch labeled rule into a single line.
+**AllowShortCaseExpressionOnASingleLine** (``ShortCaseExpressionStyle``) :versionbadge:`clang-format 19` :ref:`¶ <AllowShortCaseExpressionOnASingleLine>`
+  Dependent on the value, ``case 1 -> 1;`` can be put on a single line.
 
-  .. code-block:: java
+  Possible values:
 
-    true:                               false:
-    switch (a) {           vs.          switch (a) {
-    case 1 -> 1;                        case 1 ->
-    default -> 0;                         1;
-    };                                  default ->
-                                          0;
-                                        };
+  * ``SCES_Never`` (in configuration: ``Never``)
+    Never merge switch labeled rules into a single line.
+
+    .. code-block:: java
+
+      switch (a) {
+      case 1 ->
+        1;
+      default ->
+        0;
+      };
+
+  * ``SCES_EmptyAndAttached`` (in configuration: ``EmptyAndAttached``)
+    Only merge empty switch labeled rules whose block brace (if any) was not
+    wrapped, i.e. the corresponding ``BraceWrapping.After...`` option was
+    not set. As switch labeled rules have no brace to wrap, this behaves
+    like ``Empty``.
+
+  * ``SCES_Empty`` (in configuration: ``Empty``)
+    Only merge empty switch labeled rules.
+
+    .. code-block:: java
+
+      switch (a) {
+      case 1 -> {}
+      default ->
+        0;
+      };
+
+  * ``SCES_Always`` (in configuration: ``Always``)
+    Merge all switch labeled rules that fit on a single line.
+
+    .. code-block:: java
+
+      switch (a) {
+      case 1 -> 1;
+      default -> 0;
+      };
+
+
 
 .. _AllowShortCaseLabelsOnASingleLine:
 
-**AllowShortCaseLabelsOnASingleLine** (``Boolean``) :versionbadge:`clang-format 3.6` :ref:`¶ <AllowShortCaseLabelsOnASingleLine>`
-  If ``true``, short case labels will be contracted to a single line.
+**AllowShortCaseLabelsOnASingleLine** (``ShortCaseLabelStyle``) :versionbadge:`clang-format 3.6` :ref:`¶ <AllowShortCaseLabelsOnASingleLine>`
+  Dependent on the value, ``case 1: x = 1; break;`` can be put on a single
+  line.
 
-  .. code-block:: c++
+  Possible values:
 
-    true:                                   false:
-    switch (a) {                    vs.     switch (a) {
-    case 1: x = 1; break;                   case 1:
-    case 2: return;                           x = 1;
-    }                                         break;
-                                            case 2:
-                                              return;
-                                            }
+  * ``SCLS_Never`` (in configuration: ``Never``)
+    Never merge case labels into a single line.
+
+    .. code-block:: c++
+
+      switch (a) {
+      case 1:
+        x = 1;
+        break;
+      case 2:
+        return;
+      }
+
+  * ``SCLS_EmptyAndAttached`` (in configuration: ``EmptyAndAttached``)
+    Only merge empty case labels whose block brace (if any) was not wrapped,
+    i.e. the corresponding ``BraceWrapping.After...`` option was not set. As
+    case labels have no brace to wrap, this behaves like ``Empty``.
+
+  * ``SCLS_Empty`` (in configuration: ``Empty``)
+    Only merge empty case labels.
+
+    .. code-block:: c++
+
+      switch (a) {
+      case 1:
+      case 2:
+        return;
+      }
+
+  * ``SCLS_Always`` (in configuration: ``Always``)
+    Merge all case labels that fit on a single line.
+
+    .. code-block:: c++
+
+      switch (a) {
+      case 1: x = 1; break;
+      case 2: return;
+      }
+
+
 
 .. _AllowShortCompoundRequirementOnASingleLine:
 
-**AllowShortCompoundRequirementOnASingleLine** (``Boolean``) :versionbadge:`clang-format 18` :ref:`¶ <AllowShortCompoundRequirementOnASingleLine>`
-  Allow short compound requirement on a single line.
+**AllowShortCompoundRequirementOnASingleLine** (``ShortCompoundRequirementStyle``) :versionbadge:`clang-format 18` :ref:`¶ <AllowShortCompoundRequirementOnASingleLine>`
+  Dependent on the value, ``{ x + 1 } -> std::same_as<int>;`` can be put on
+  a single line.
 
-  .. code-block:: c++
+  Possible values:
 
-    true:
-    template <typename T>
-    concept c = requires(T x) {
-      { x + 1 } -> std::same_as<int>;
-    };
+  * ``SCRS_Never`` (in configuration: ``Never``)
+    Never merge compound requirements into a single line.
 
-    false:
-    template <typename T>
-    concept c = requires(T x) {
-      {
-        x + 1
-      } -> std::same_as<int>;
-    };
+    .. code-block:: c++
+
+      template <typename T>
+      concept c = requires(T x) {
+        {
+          x + 1
+        } -> std::same_as<int>;
+      };
+
+  * ``SCRS_EmptyAndAttached`` (in configuration: ``EmptyAndAttached``)
+    Only merge empty compound requirements if the opening brace was not
+    wrapped, i.e. the corresponding ``BraceWrapping.After...`` option was
+    not set.
+
+  * ``SCRS_Empty`` (in configuration: ``Empty``)
+    Only merge empty compound requirements.
+
+  * ``SCRS_Always`` (in configuration: ``Always``)
+    Merge all compound requirements that fit on a single line.
+
+    .. code-block:: c++
+
+      template <typename T>
+      concept c = requires(T x) {
+        { x + 1 } -> std::same_as<int>;
+      };
+
+
 
 .. _AllowShortEnumsOnASingleLine:
 
-**AllowShortEnumsOnASingleLine** (``Boolean``) :versionbadge:`clang-format 11` :ref:`¶ <AllowShortEnumsOnASingleLine>`
-  Allow short enums on a single line.
+**AllowShortEnumsOnASingleLine** (``ShortEnumStyle``) :versionbadge:`clang-format 11` :ref:`¶ <AllowShortEnumsOnASingleLine>`
+  Dependent on the value, ``enum { A, B } myEnum;`` can be put on a single
+  line.
 
-  .. code-block:: c++
+  Possible values:
 
-    true:
-    enum { A, B } myEnum;
+  * ``SES_Never`` (in configuration: ``Never``)
+    Never merge enums into a single line.
 
-    false:
-    enum {
-      A,
-      B
-    } myEnum;
+    .. code-block:: c++
+
+      enum {
+        A,
+        B
+      } myEnum;
+
+  * ``SES_EmptyAndAttached`` (in configuration: ``EmptyAndAttached``)
+    Only merge empty enums if the opening brace was not wrapped, i.e. the
+    corresponding ``BraceWrapping.AfterEnum`` option was not set.
+
+  * ``SES_Empty`` (in configuration: ``Empty``)
+    Only merge empty enums.
+
+    .. code-block:: c++
+
+      enum {} myEnum;
+
+  * ``SES_Always`` (in configuration: ``Always``)
+    Merge all enums that fit on a single line.
+
+    .. code-block:: c++
+
+      enum { A, B } myEnum;
+
+
 
 .. _AllowShortFunctionsOnASingleLine:
 
@@ -2165,14 +2272,80 @@ the configuration (without a prefix: ``Auto``).
 
 .. _AllowShortLoopsOnASingleLine:
 
-**AllowShortLoopsOnASingleLine** (``Boolean``) :versionbadge:`clang-format 3.7` :ref:`¶ <AllowShortLoopsOnASingleLine>`
-  If ``true``, ``while (true) continue;`` can be put on a single
+**AllowShortLoopsOnASingleLine** (``ShortLoopStyle``) :versionbadge:`clang-format 3.7` :ref:`¶ <AllowShortLoopsOnASingleLine>`
+  Dependent on the value, ``while (true) continue;`` can be put on a single
   line.
+
+  Possible values:
+
+  * ``SLPS_Never`` (in configuration: ``Never``)
+    Never merge loops into a single line.
+
+    .. code-block:: c++
+
+      while (true) {
+        continue;
+      }
+
+  * ``SLPS_EmptyAndAttached`` (in configuration: ``EmptyAndAttached``)
+    Only merge empty loops if the opening brace was not wrapped, i.e. the
+    corresponding ``BraceWrapping.AfterControlStatement`` option was not
+    set. A braceless loop has no brace to wrap, so this behaves like
+    ``Empty`` for braceless loops.
+
+  * ``SLPS_Empty`` (in configuration: ``Empty``)
+    Only merge empty loops.
+
+    .. code-block:: c++
+
+      while (true) {}
+
+  * ``SLPS_Always`` (in configuration: ``Always``)
+    Merge all loops that fit on a single line.
+
+    .. code-block:: c++
+
+      while (true) continue;
+      while (true) { continue; }
+
+
 
 .. _AllowShortNamespacesOnASingleLine:
 
-**AllowShortNamespacesOnASingleLine** (``Boolean``) :versionbadge:`clang-format 20` :ref:`¶ <AllowShortNamespacesOnASingleLine>`
-  If ``true``, ``namespace a { class b; }`` can be put on a single line.
+**AllowShortNamespacesOnASingleLine** (``ShortNamespaceStyle``) :versionbadge:`clang-format 20` :ref:`¶ <AllowShortNamespacesOnASingleLine>`
+  Dependent on the value, ``namespace a { class b; }`` can be put on a
+  single line.
+
+  Possible values:
+
+  * ``SNS_Never`` (in configuration: ``Never``)
+    Never merge namespaces into a single line.
+
+    .. code-block:: c++
+
+      namespace a {
+      class b;
+      }
+
+  * ``SNS_EmptyAndAttached`` (in configuration: ``EmptyAndAttached``)
+    Only merge empty namespaces if the opening brace was not wrapped, i.e.
+    the corresponding ``BraceWrapping.AfterNamespace`` option was not set.
+
+  * ``SNS_Empty`` (in configuration: ``Empty``)
+    Only merge empty namespaces.
+
+    .. code-block:: c++
+
+      namespace a {}
+
+  * ``SNS_Always`` (in configuration: ``Always``)
+    Merge all namespaces that fit on a single line.
+
+    .. code-block:: c++
+
+      namespace a { class b; }
+
+
 
 .. _AllowShortRecordOnASingleLine:
 

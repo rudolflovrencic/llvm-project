@@ -1395,7 +1395,7 @@ TEST_F(FormatTest, FormatLoopsWithoutCompoundStatement) {
                "  ;");
 
   FormatStyle AllowsMergedLoops = getLLVMStyle();
-  AllowsMergedLoops.AllowShortLoopsOnASingleLine = true;
+  AllowsMergedLoops.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Always;
 
   verifyFormat("while (true) continue;", AllowsMergedLoops);
   verifyFormat("for (;;) continue;", AllowsMergedLoops);
@@ -1512,7 +1512,7 @@ TEST_F(FormatTest, FormatShortBracedStatements) {
   AllowSimpleBracedStatements.ColumnLimit = 40;
   AllowSimpleBracedStatements.AllowShortBlocksOnASingleLine =
       FormatStyle::SBS_Always;
-  AllowSimpleBracedStatements.AllowShortLoopsOnASingleLine = true;
+  AllowSimpleBracedStatements.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Always;
   AllowSimpleBracedStatements.BreakBeforeBraces = FormatStyle::BS_Custom;
   AllowSimpleBracedStatements.BraceWrapping.AfterFunction = true;
   AllowSimpleBracedStatements.BraceWrapping.SplitEmptyRecord = false;
@@ -1623,7 +1623,7 @@ TEST_F(FormatTest, FormatShortBracedStatements) {
                "}",
                AllowSimpleBracedStatements);
 
-  AllowSimpleBracedStatements.AllowShortLoopsOnASingleLine = false;
+  AllowSimpleBracedStatements.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Never;
   verifyFormat("while (true) {}", AllowSimpleBracedStatements);
   verifyFormat("while (true) { f(); }", AllowSimpleBracedStatements);
   verifyFormat("for (;;) {}", AllowSimpleBracedStatements);
@@ -1634,7 +1634,7 @@ TEST_F(FormatTest, FormatShortBracedStatements) {
 
   AllowSimpleBracedStatements.AllowShortIfStatementsOnASingleLine =
       FormatStyle::SIS_WithoutElse;
-  AllowSimpleBracedStatements.AllowShortLoopsOnASingleLine = true;
+  AllowSimpleBracedStatements.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Always;
   AllowSimpleBracedStatements.BraceWrapping.AfterControlStatement =
       FormatStyle::BWACS_Always;
 
@@ -1748,7 +1748,7 @@ TEST_F(FormatTest, FormatShortBracedStatements) {
                "}",
                AllowSimpleBracedStatements);
 
-  AllowSimpleBracedStatements.AllowShortLoopsOnASingleLine = false;
+  AllowSimpleBracedStatements.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Never;
   verifyFormat("while (true) {}", AllowSimpleBracedStatements);
   verifyFormat("while (true)\n"
                "{\n"
@@ -2424,7 +2424,7 @@ TEST_F(FormatTest, ForEachLoops) {
                ShortBlocks);
 
   FormatStyle ShortLoops = getLLVMStyle();
-  ShortLoops.AllowShortLoopsOnASingleLine = true;
+  ShortLoops.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Always;
   EXPECT_EQ(ShortLoops.AllowShortBlocksOnASingleLine, FormatStyle::SBS_Never);
   verifyFormat("void f() {\n"
                "  for (;;) int j = 1;\n"
@@ -2440,7 +2440,7 @@ TEST_F(FormatTest, ForEachLoops) {
 
   FormatStyle ShortBlocksAndLoops = getLLVMStyle();
   ShortBlocksAndLoops.AllowShortBlocksOnASingleLine = FormatStyle::SBS_Always;
-  ShortBlocksAndLoops.AllowShortLoopsOnASingleLine = true;
+  ShortBlocksAndLoops.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Always;
   verifyFormat("void f() {\n"
                "  for (;;) int j = 1;\n"
                "  Q_FOREACH (int &v, vec) int j = 1;\n"
@@ -2832,7 +2832,7 @@ TEST_F(FormatTest, ShortEnums) {
   EXPECT_FALSE(Style.BraceWrapping.AfterEnum);
   verifyFormat("enum { A, B, C } ShortEnum1, ShortEnum2;", Style);
   verifyFormat("typedef enum { A, B, C } ShortEnum1, ShortEnum2;", Style);
-  Style.AllowShortEnumsOnASingleLine = false;
+  Style.AllowShortEnumsOnASingleLine = FormatStyle::SES_Never;
   verifyFormat("enum {\n"
                "  A,\n"
                "  B,\n"
@@ -2870,13 +2870,44 @@ TEST_F(FormatTest, ShortEnums) {
                "} ShortEnum1, ShortEnum2;",
                Style);
 
-  Style.AllowShortEnumsOnASingleLine = true;
+  Style.AllowShortEnumsOnASingleLine = FormatStyle::SES_Always;
   verifyFormat("export enum\n"
                "{\n"
                "  A,\n"
                "  B,\n"
                "  C\n"
                "} ShortEnum1, ShortEnum2;",
+               Style);
+
+  // Empty: only empty enums (with an attached brace) are kept on a single
+  // line; non-empty enums are split.
+  Style = getLLVMStyle();
+  Style.AllowShortEnumsOnASingleLine = FormatStyle::SES_Empty;
+  verifyFormat("enum E {};", Style);
+  verifyFormat("enum E {\n"
+               "  A,\n"
+               "  B\n"
+               "};",
+               Style);
+  // A wrapped enum brace is not re-merged, so the enum is split.
+  Style.BreakBeforeBraces = FormatStyle::BS_Custom;
+  Style.BraceWrapping.AfterEnum = true;
+  verifyFormat("enum E\n"
+               "{\n"
+               "  A,\n"
+               "  B\n"
+               "};",
+               Style);
+
+  // EmptyAndAttached behaves like Empty here: enums are only kept on a single
+  // line when empty and the brace is attached.
+  Style = getLLVMStyle();
+  Style.AllowShortEnumsOnASingleLine = FormatStyle::SES_EmptyAndAttached;
+  verifyFormat("enum E {};", Style);
+  verifyFormat("enum E {\n"
+               "  A,\n"
+               "  B\n"
+               "};",
                Style);
 }
 
@@ -2896,7 +2927,7 @@ TEST_F(FormatTest, ShortCompoundRequirement) {
                "};",
                Style);
 
-  Style.AllowShortCompoundRequirementOnASingleLine = false;
+  Style.AllowShortCompoundRequirementOnASingleLine = FormatStyle::SCRS_Never;
   verifyFormat("template <typename T>\n"
                "concept c = requires(T x) {\n"
                "  {\n"
@@ -2915,7 +2946,7 @@ TEST_F(FormatTest, ShortCompoundRequirement) {
                "};",
                Style);
 
-  Style.AllowShortCompoundRequirementOnASingleLine = true;
+  Style.AllowShortCompoundRequirementOnASingleLine = FormatStyle::SCRS_Always;
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
   Style.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_MultiLine;
   verifyFormat(Code, Style);
@@ -2923,7 +2954,7 @@ TEST_F(FormatTest, ShortCompoundRequirement) {
 
 TEST_F(FormatTest, ShortCaseLabels) {
   FormatStyle Style = getLLVMStyle();
-  Style.AllowShortCaseLabelsOnASingleLine = true;
+  Style.AllowShortCaseLabelsOnASingleLine = FormatStyle::SCLS_Always;
   verifyFormat("switch (a) {\n"
                "case 1: x = 1; break;\n"
                "case 2: return;\n"
@@ -3056,7 +3087,7 @@ TEST_F(FormatTest, ShortCaseLabels) {
                "}",
                Style);
   Style.ColumnLimit = 80;
-  Style.AllowShortCaseLabelsOnASingleLine = false;
+  Style.AllowShortCaseLabelsOnASingleLine = FormatStyle::SCLS_Never;
   Style.IndentCaseLabels = true;
   verifyFormat("switch (n) {\n"
                "  default /*comments*/:\n"
@@ -3071,7 +3102,7 @@ TEST_F(FormatTest, ShortCaseLabels) {
                "  return false;\n"
                "}",
                Style);
-  Style.AllowShortCaseLabelsOnASingleLine = true;
+  Style.AllowShortCaseLabelsOnASingleLine = FormatStyle::SCLS_Always;
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
   Style.BraceWrapping.AfterCaseLabel = true;
   Style.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_Always;
@@ -3576,7 +3607,7 @@ TEST_F(FormatTest, MultiLineControlStatements) {
   Style = getLLVMStyle();
   Style.AllowShortBlocksOnASingleLine = FormatStyle::SBS_Always;
   Style.AllowShortIfStatementsOnASingleLine = FormatStyle::SIS_WithoutElse;
-  Style.AllowShortLoopsOnASingleLine = true;
+  Style.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Always;
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
   Style.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_MultiLine;
   verifyFormat("if (true) { return; }", Style);
@@ -19336,7 +19367,7 @@ TEST_F(FormatTest, AllmanBraceBreaking) {
   FormatStyle BreakBeforeBraceShortIfs = AllmanBraceStyle;
   BreakBeforeBraceShortIfs.AllowShortIfStatementsOnASingleLine =
       FormatStyle::SIS_WithoutElse;
-  BreakBeforeBraceShortIfs.AllowShortLoopsOnASingleLine = true;
+  BreakBeforeBraceShortIfs.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Always;
   verifyFormat("void f(bool b)\n"
                "{\n"
                "  if (b)\n"
@@ -19755,7 +19786,7 @@ TEST_F(FormatTest, WhitesmithsBraceBreaking) {
   FormatStyle BreakBeforeBraceShortIfs = WhitesmithsBraceStyle;
   BreakBeforeBraceShortIfs.AllowShortIfStatementsOnASingleLine =
       FormatStyle::SIS_OnlyFirstIf;
-  BreakBeforeBraceShortIfs.AllowShortLoopsOnASingleLine = true;
+  BreakBeforeBraceShortIfs.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Always;
   verifyFormat("void f(bool b)\n"
                "  {\n"
                "  if (b)\n"
@@ -24741,7 +24772,7 @@ TEST_F(FormatTest, IndentAccessModifiers) {
 
   Style.BreakBeforeBraces = FormatStyle::BS_Attach;
   // Enumerations are not records and should be unaffected.
-  Style.AllowShortEnumsOnASingleLine = false;
+  Style.AllowShortEnumsOnASingleLine = FormatStyle::SES_Never;
   verifyFormat("enum class E {\n"
                "  A,\n"
                "  B\n"
@@ -25159,7 +25190,7 @@ TEST_F(FormatTest, EnumTrailingComma) {
                Code, Style);
 
   EXPECT_TRUE(Style.AllowShortEnumsOnASingleLine);
-  Style.AllowShortEnumsOnASingleLine = false;
+  Style.AllowShortEnumsOnASingleLine = FormatStyle::SES_Never;
 
   constexpr StringRef Input("enum {\n"
                             "  //\n"
@@ -26250,7 +26281,7 @@ TEST_F(FormatTest, KeepFormFeed) {
 
 TEST_F(FormatTest, ShortNamespacesOption) {
   auto Style = getLLVMStyleWithColumns(60);
-  Style.AllowShortNamespacesOnASingleLine = true;
+  Style.AllowShortNamespacesOnASingleLine = FormatStyle::SNS_Always;
 
   verifyFormat("namespace {\n"
                "void xxxxx(nnn::TTTTT *mmm, YYYYY &yyyyy);\n"

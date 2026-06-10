@@ -838,6 +838,88 @@ template <> struct ScalarEnumerationTraits<FormatStyle::ShortRecordStyle> {
   }
 };
 
+template <>
+struct ScalarEnumerationTraits<FormatStyle::ShortCaseExpressionStyle> {
+  static void enumeration(IO &IO,
+                          FormatStyle::ShortCaseExpressionStyle &Value) {
+    IO.enumCase(Value, "Never", FormatStyle::SCES_Never);
+    IO.enumCase(Value, "EmptyAndAttached", FormatStyle::SCES_EmptyAndAttached);
+    IO.enumCase(Value, "Empty", FormatStyle::SCES_Empty);
+    IO.enumCase(Value, "Always", FormatStyle::SCES_Always);
+
+    // For backward compatibility.
+    IO.enumCase(Value, "false", FormatStyle::SCES_Never);
+    IO.enumCase(Value, "true", FormatStyle::SCES_Always);
+  }
+};
+
+template <> struct ScalarEnumerationTraits<FormatStyle::ShortCaseLabelStyle> {
+  static void enumeration(IO &IO, FormatStyle::ShortCaseLabelStyle &Value) {
+    IO.enumCase(Value, "Never", FormatStyle::SCLS_Never);
+    IO.enumCase(Value, "EmptyAndAttached", FormatStyle::SCLS_EmptyAndAttached);
+    IO.enumCase(Value, "Empty", FormatStyle::SCLS_Empty);
+    IO.enumCase(Value, "Always", FormatStyle::SCLS_Always);
+
+    // For backward compatibility.
+    IO.enumCase(Value, "false", FormatStyle::SCLS_Never);
+    IO.enumCase(Value, "true", FormatStyle::SCLS_Always);
+  }
+};
+
+template <>
+struct ScalarEnumerationTraits<FormatStyle::ShortCompoundRequirementStyle> {
+  static void enumeration(IO &IO,
+                          FormatStyle::ShortCompoundRequirementStyle &Value) {
+    IO.enumCase(Value, "Never", FormatStyle::SCRS_Never);
+    IO.enumCase(Value, "EmptyAndAttached", FormatStyle::SCRS_EmptyAndAttached);
+    IO.enumCase(Value, "Empty", FormatStyle::SCRS_Empty);
+    IO.enumCase(Value, "Always", FormatStyle::SCRS_Always);
+
+    // For backward compatibility.
+    IO.enumCase(Value, "false", FormatStyle::SCRS_Never);
+    IO.enumCase(Value, "true", FormatStyle::SCRS_Always);
+  }
+};
+
+template <> struct ScalarEnumerationTraits<FormatStyle::ShortEnumStyle> {
+  static void enumeration(IO &IO, FormatStyle::ShortEnumStyle &Value) {
+    IO.enumCase(Value, "Never", FormatStyle::SES_Never);
+    IO.enumCase(Value, "EmptyAndAttached", FormatStyle::SES_EmptyAndAttached);
+    IO.enumCase(Value, "Empty", FormatStyle::SES_Empty);
+    IO.enumCase(Value, "Always", FormatStyle::SES_Always);
+
+    // For backward compatibility.
+    IO.enumCase(Value, "false", FormatStyle::SES_Never);
+    IO.enumCase(Value, "true", FormatStyle::SES_Always);
+  }
+};
+
+template <> struct ScalarEnumerationTraits<FormatStyle::ShortLoopStyle> {
+  static void enumeration(IO &IO, FormatStyle::ShortLoopStyle &Value) {
+    IO.enumCase(Value, "Never", FormatStyle::SLPS_Never);
+    IO.enumCase(Value, "EmptyAndAttached", FormatStyle::SLPS_EmptyAndAttached);
+    IO.enumCase(Value, "Empty", FormatStyle::SLPS_Empty);
+    IO.enumCase(Value, "Always", FormatStyle::SLPS_Always);
+
+    // For backward compatibility.
+    IO.enumCase(Value, "false", FormatStyle::SLPS_Never);
+    IO.enumCase(Value, "true", FormatStyle::SLPS_Always);
+  }
+};
+
+template <> struct ScalarEnumerationTraits<FormatStyle::ShortNamespaceStyle> {
+  static void enumeration(IO &IO, FormatStyle::ShortNamespaceStyle &Value) {
+    IO.enumCase(Value, "Never", FormatStyle::SNS_Never);
+    IO.enumCase(Value, "EmptyAndAttached", FormatStyle::SNS_EmptyAndAttached);
+    IO.enumCase(Value, "Empty", FormatStyle::SNS_Empty);
+    IO.enumCase(Value, "Always", FormatStyle::SNS_Always);
+
+    // For backward compatibility.
+    IO.enumCase(Value, "false", FormatStyle::SNS_Never);
+    IO.enumCase(Value, "true", FormatStyle::SNS_Always);
+  }
+};
+
 template <> struct MappingTraits<FormatStyle::SortIncludesOptions> {
   static void enumInput(IO &IO, FormatStyle::SortIncludesOptions &Value) {
     IO.enumCase(Value, "Never", FormatStyle::SortIncludesOptions{});
@@ -1849,16 +1931,16 @@ FormatStyle getLLVMStyle(FormatStyle::LanguageKind Language) {
   LLVMStyle.AllowBreakBeforeNoexceptSpecifier = FormatStyle::BBNSS_Never;
   LLVMStyle.AllowBreakBeforeQtProperty = false;
   LLVMStyle.AllowShortBlocksOnASingleLine = FormatStyle::SBS_Never;
-  LLVMStyle.AllowShortCaseExpressionOnASingleLine = true;
-  LLVMStyle.AllowShortCaseLabelsOnASingleLine = false;
-  LLVMStyle.AllowShortCompoundRequirementOnASingleLine = true;
-  LLVMStyle.AllowShortEnumsOnASingleLine = true;
+  LLVMStyle.AllowShortCaseExpressionOnASingleLine = FormatStyle::SCES_Always;
+  LLVMStyle.AllowShortCaseLabelsOnASingleLine = FormatStyle::SCLS_Never;
+  LLVMStyle.AllowShortCompoundRequirementOnASingleLine = FormatStyle::SCRS_Always;
+  LLVMStyle.AllowShortEnumsOnASingleLine = FormatStyle::SES_Always;
   LLVMStyle.AllowShortFunctionsOnASingleLine =
       FormatStyle::ShortFunctionStyle::setAll();
   LLVMStyle.AllowShortIfStatementsOnASingleLine = FormatStyle::SIS_Never;
   LLVMStyle.AllowShortLambdasOnASingleLine = FormatStyle::SLS_All;
-  LLVMStyle.AllowShortLoopsOnASingleLine = false;
-  LLVMStyle.AllowShortNamespacesOnASingleLine = false;
+  LLVMStyle.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Never;
+  LLVMStyle.AllowShortNamespacesOnASingleLine = FormatStyle::SNS_Never;
   LLVMStyle.AllowShortRecordOnASingleLine = FormatStyle::SRS_EmptyAndAttached;
   LLVMStyle.AlwaysBreakAfterDefinitionReturnType = FormatStyle::DRTBS_None;
   LLVMStyle.AlwaysBreakBeforeMultilineStrings = false;
@@ -2086,7 +2168,7 @@ FormatStyle getGoogleStyle(FormatStyle::LanguageKind Language) {
   GoogleStyle.AlignEscapedNewlines = FormatStyle::ENAS_Left;
   GoogleStyle.AllowShortIfStatementsOnASingleLine =
       FormatStyle::SIS_WithoutElse;
-  GoogleStyle.AllowShortLoopsOnASingleLine = true;
+  GoogleStyle.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Always;
   GoogleStyle.AlwaysBreakBeforeMultilineStrings = true;
   // Abseil aliases to clang's `_Nonnull`, `_Nullable` and `_Null_unspecified`.
   GoogleStyle.AttributeMacros.push_back("absl_nonnull");
@@ -2269,13 +2351,13 @@ FormatStyle getChromiumStyle(FormatStyle::LanguageKind Language) {
     };
   } else if (Language == FormatStyle::LK_JavaScript) {
     ChromiumStyle.AllowShortIfStatementsOnASingleLine = FormatStyle::SIS_Never;
-    ChromiumStyle.AllowShortLoopsOnASingleLine = false;
+    ChromiumStyle.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Never;
   } else {
     ChromiumStyle.AllowAllParametersOfDeclarationOnNextLine = false;
     ChromiumStyle.AllowShortFunctionsOnASingleLine =
         FormatStyle::ShortFunctionStyle::setEmptyAndInline();
     ChromiumStyle.AllowShortIfStatementsOnASingleLine = FormatStyle::SIS_Never;
-    ChromiumStyle.AllowShortLoopsOnASingleLine = false;
+    ChromiumStyle.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Never;
     ChromiumStyle.PackParameters.BinPack = FormatStyle::BPPS_OnePerLine;
     ChromiumStyle.DerivePointerAlignment = false;
     if (Language == FormatStyle::LK_ObjC)
@@ -2369,11 +2451,11 @@ FormatStyle getMicrosoftStyle(FormatStyle::LanguageKind Language) {
   Style.BraceWrapping.BeforeElse = true;
   Style.BraceWrapping.BeforeWhile = false;
   Style.PenaltyReturnTypeOnItsOwnLine = 1000;
-  Style.AllowShortEnumsOnASingleLine = false;
+  Style.AllowShortEnumsOnASingleLine = FormatStyle::SES_Never;
   Style.AllowShortFunctionsOnASingleLine = FormatStyle::ShortFunctionStyle();
-  Style.AllowShortCaseLabelsOnASingleLine = false;
+  Style.AllowShortCaseLabelsOnASingleLine = FormatStyle::SCLS_Never;
   Style.AllowShortIfStatementsOnASingleLine = FormatStyle::SIS_Never;
-  Style.AllowShortLoopsOnASingleLine = false;
+  Style.AllowShortLoopsOnASingleLine = FormatStyle::SLPS_Never;
   Style.AlwaysBreakAfterDefinitionReturnType = FormatStyle::DRTBS_None;
   Style.BreakAfterReturnType = FormatStyle::RTBS_None;
   return Style;
@@ -4221,8 +4303,10 @@ reformat(const FormatStyle &Style, StringRef Code,
   default:
     break;
   }
+  // A wrapped enum brace is never re-merged, so short enums are disabled when
+  // the opening brace is wrapped onto its own line.
   if (Expanded.BraceWrapping.AfterEnum)
-    Expanded.AllowShortEnumsOnASingleLine = false;
+    Expanded.AllowShortEnumsOnASingleLine = FormatStyle::SES_Never;
 
   if (Expanded.DisableFormat)
     return {tooling::Replacements(), 0};

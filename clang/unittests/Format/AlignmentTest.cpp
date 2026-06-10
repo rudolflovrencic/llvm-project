@@ -2132,7 +2132,7 @@ TEST_F(AlignmentTest, ConsecutiveBitFieldsAcrossEmptyLinesAndComments) {
 
 TEST_F(AlignmentTest, ConsecutiveAlignConsecutiveShortCaseStatements) {
   FormatStyle Alignment = getLLVMStyle();
-  Alignment.AllowShortCaseLabelsOnASingleLine = true;
+  Alignment.AllowShortCaseLabelsOnASingleLine = FormatStyle::SCLS_Always;
   Alignment.AlignConsecutiveShortCaseStatements.Enabled = true;
 
   verifyFormat("switch (level) {\n"

@@ -1379,7 +1379,7 @@ TEST_F(FormatTestCSharp, CSharpAfterEnum) {
   FormatStyle Style = getGoogleStyle(FormatStyle::LK_CSharp);
   Style.BreakBeforeBraces = FormatStyle::BS_Custom;
   Style.BraceWrapping.AfterEnum = false;
-  Style.AllowShortEnumsOnASingleLine = false;
+  Style.AllowShortEnumsOnASingleLine = FormatStyle::SES_Never;
 
   verifyFormat("enum MyEnum {\n"
                "  Foo,\n"
@@ -1408,7 +1408,7 @@ TEST_F(FormatTestCSharp, CSharpAfterEnum) {
                Style);
 
   Style.BraceWrapping.AfterEnum = true;
-  Style.AllowShortEnumsOnASingleLine = false;
+  Style.AllowShortEnumsOnASingleLine = FormatStyle::SES_Never;
 
   verifyFormat("enum MyEnum\n"
                "{\n"

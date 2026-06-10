@@ -882,11 +882,12 @@ void WhitespaceManager::alignConsecutiveColons(
 }
 
 void WhitespaceManager::alignConsecutiveShortCaseStatements(bool IsExpr) {
-  if (!Style.AlignConsecutiveShortCaseStatements.Enabled ||
-      !(IsExpr ? Style.AllowShortCaseExpressionOnASingleLine
-               : Style.AllowShortCaseLabelsOnASingleLine)) {
+  const bool AllowShortCase =
+      IsExpr ? Style.AllowShortCaseExpressionOnASingleLine ==
+                   FormatStyle::SCES_Always
+             : Style.AllowShortCaseLabelsOnASingleLine == FormatStyle::SCLS_Always;
+  if (!Style.AlignConsecutiveShortCaseStatements.Enabled || !AllowShortCase)
     return;
-  }
 
   const auto Type = IsExpr ? TT_CaseLabelArrow : TT_CaseLabelColon;
   const auto &Option = Style.AlignConsecutiveShortCaseStatements;

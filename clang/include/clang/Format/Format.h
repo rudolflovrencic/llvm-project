@@ -770,65 +770,151 @@ struct FormatStyle {
   /// \version 3.5
   ShortBlockStyle AllowShortBlocksOnASingleLine;
 
-  /// Whether to merge a short switch labeled rule into a single line.
-  /// \code{.java}
-  ///   true:                               false:
-  ///   switch (a) {           vs.          switch (a) {
-  ///   case 1 -> 1;                        case 1 ->
-  ///   default -> 0;                         1;
-  ///   };                                  default ->
-  ///                                         0;
-  ///                                       };
-  /// \endcode
+  /// Different styles for merging short switch labeled rules into a single
+  /// line.
+  enum ShortCaseExpressionStyle : int8_t {
+    /// Never merge switch labeled rules into a single line.
+    /// \code{.java}
+    ///   switch (a) {
+    ///   case 1 ->
+    ///     1;
+    ///   default ->
+    ///     0;
+    ///   };
+    /// \endcode
+    SCES_Never,
+    /// Only merge empty switch labeled rules whose block brace (if any) was not
+    /// wrapped, i.e. the corresponding ``BraceWrapping.After...`` option was
+    /// not set. As switch labeled rules have no brace to wrap, this behaves
+    /// like ``Empty``.
+    SCES_EmptyAndAttached,
+    /// Only merge empty switch labeled rules.
+    /// \code{.java}
+    ///   switch (a) {
+    ///   case 1 -> {}
+    ///   default ->
+    ///     0;
+    ///   };
+    /// \endcode
+    SCES_Empty,
+    /// Merge all switch labeled rules that fit on a single line.
+    /// \code{.java}
+    ///   switch (a) {
+    ///   case 1 -> 1;
+    ///   default -> 0;
+    ///   };
+    /// \endcode
+    SCES_Always,
+  };
+
+  /// Dependent on the value, ``case 1 -> 1;`` can be put on a single line.
   /// \version 19
-  bool AllowShortCaseExpressionOnASingleLine;
+  ShortCaseExpressionStyle AllowShortCaseExpressionOnASingleLine;
 
-  /// If ``true``, short case labels will be contracted to a single line.
-  /// \code
-  ///   true:                                   false:
-  ///   switch (a) {                    vs.     switch (a) {
-  ///   case 1: x = 1; break;                   case 1:
-  ///   case 2: return;                           x = 1;
-  ///   }                                         break;
-  ///                                           case 2:
-  ///                                             return;
-  ///                                           }
-  /// \endcode
+  /// Different styles for merging short case labels into a single line.
+  enum ShortCaseLabelStyle : int8_t {
+    /// Never merge case labels into a single line.
+    /// \code
+    ///   switch (a) {
+    ///   case 1:
+    ///     x = 1;
+    ///     break;
+    ///   case 2:
+    ///     return;
+    ///   }
+    /// \endcode
+    SCLS_Never,
+    /// Only merge empty case labels whose block brace (if any) was not wrapped,
+    /// i.e. the corresponding ``BraceWrapping.After...`` option was not set. As
+    /// case labels have no brace to wrap, this behaves like ``Empty``.
+    SCLS_EmptyAndAttached,
+    /// Only merge empty case labels.
+    /// \code
+    ///   switch (a) {
+    ///   case 1:
+    ///   case 2:
+    ///     return;
+    ///   }
+    /// \endcode
+    SCLS_Empty,
+    /// Merge all case labels that fit on a single line.
+    /// \code
+    ///   switch (a) {
+    ///   case 1: x = 1; break;
+    ///   case 2: return;
+    ///   }
+    /// \endcode
+    SCLS_Always,
+  };
+
+  /// Dependent on the value, ``case 1: x = 1; break;`` can be put on a single
+  /// line.
   /// \version 3.6
-  bool AllowShortCaseLabelsOnASingleLine;
+  ShortCaseLabelStyle AllowShortCaseLabelsOnASingleLine;
 
-  /// Allow short compound requirement on a single line.
-  /// \code
-  ///   true:
-  ///   template <typename T>
-  ///   concept c = requires(T x) {
-  ///     { x + 1 } -> std::same_as<int>;
-  ///   };
-  ///
-  ///   false:
-  ///   template <typename T>
-  ///   concept c = requires(T x) {
-  ///     {
-  ///       x + 1
-  ///     } -> std::same_as<int>;
-  ///   };
-  /// \endcode
+  /// Different styles for merging short compound requirements into a single
+  /// line.
+  enum ShortCompoundRequirementStyle : int8_t {
+    /// Never merge compound requirements into a single line.
+    /// \code
+    ///   template <typename T>
+    ///   concept c = requires(T x) {
+    ///     {
+    ///       x + 1
+    ///     } -> std::same_as<int>;
+    ///   };
+    /// \endcode
+    SCRS_Never,
+    /// Only merge empty compound requirements if the opening brace was not
+    /// wrapped, i.e. the corresponding ``BraceWrapping.After...`` option was
+    /// not set.
+    SCRS_EmptyAndAttached,
+    /// Only merge empty compound requirements.
+    SCRS_Empty,
+    /// Merge all compound requirements that fit on a single line.
+    /// \code
+    ///   template <typename T>
+    ///   concept c = requires(T x) {
+    ///     { x + 1 } -> std::same_as<int>;
+    ///   };
+    /// \endcode
+    SCRS_Always,
+  };
+
+  /// Dependent on the value, ``{ x + 1 } -> std::same_as<int>;`` can be put on
+  /// a single line.
   /// \version 18
-  bool AllowShortCompoundRequirementOnASingleLine;
+  ShortCompoundRequirementStyle AllowShortCompoundRequirementOnASingleLine;
 
-  /// Allow short enums on a single line.
-  /// \code
-  ///   true:
-  ///   enum { A, B } myEnum;
-  ///
-  ///   false:
-  ///   enum {
-  ///     A,
-  ///     B
-  ///   } myEnum;
-  /// \endcode
+  /// Different styles for merging short enums into a single line.
+  enum ShortEnumStyle : int8_t {
+    /// Never merge enums into a single line.
+    /// \code
+    ///   enum {
+    ///     A,
+    ///     B
+    ///   } myEnum;
+    /// \endcode
+    SES_Never,
+    /// Only merge empty enums if the opening brace was not wrapped, i.e. the
+    /// corresponding ``BraceWrapping.AfterEnum`` option was not set.
+    SES_EmptyAndAttached,
+    /// Only merge empty enums.
+    /// \code
+    ///   enum {} myEnum;
+    /// \endcode
+    SES_Empty,
+    /// Merge all enums that fit on a single line.
+    /// \code
+    ///   enum { A, B } myEnum;
+    /// \endcode
+    SES_Always,
+  };
+
+  /// Dependent on the value, ``enum { A, B } myEnum;`` can be put on a single
+  /// line.
   /// \version 11
-  bool AllowShortEnumsOnASingleLine;
+  ShortEnumStyle AllowShortEnumsOnASingleLine;
 
   /// Different styles for merging short functions containing at most one
   /// statement.
@@ -1060,14 +1146,66 @@ struct FormatStyle {
   /// \version 9
   ShortLambdaStyle AllowShortLambdasOnASingleLine;
 
-  /// If ``true``, ``while (true) continue;`` can be put on a single
+  /// Different styles for merging short loops into a single line.
+  enum ShortLoopStyle : int8_t {
+    /// Never merge loops into a single line.
+    /// \code
+    ///   while (true) {
+    ///     continue;
+    ///   }
+    /// \endcode
+    SLPS_Never,
+    /// Only merge empty loops if the opening brace was not wrapped, i.e. the
+    /// corresponding ``BraceWrapping.AfterControlStatement`` option was not
+    /// set. A braceless loop has no brace to wrap, so this behaves like
+    /// ``Empty`` for braceless loops.
+    SLPS_EmptyAndAttached,
+    /// Only merge empty loops.
+    /// \code
+    ///   while (true) {}
+    /// \endcode
+    SLPS_Empty,
+    /// Merge all loops that fit on a single line.
+    /// \code
+    ///   while (true) continue;
+    ///   while (true) { continue; }
+    /// \endcode
+    SLPS_Always,
+  };
+
+  /// Dependent on the value, ``while (true) continue;`` can be put on a single
   /// line.
   /// \version 3.7
-  bool AllowShortLoopsOnASingleLine;
+  ShortLoopStyle AllowShortLoopsOnASingleLine;
 
-  /// If ``true``, ``namespace a { class b; }`` can be put on a single line.
+  /// Different styles for merging short namespaces into a single line.
+  enum ShortNamespaceStyle : int8_t {
+    /// Never merge namespaces into a single line.
+    /// \code
+    ///   namespace a {
+    ///   class b;
+    ///   }
+    /// \endcode
+    SNS_Never,
+    /// Only merge empty namespaces if the opening brace was not wrapped, i.e.
+    /// the corresponding ``BraceWrapping.AfterNamespace`` option was not set.
+    SNS_EmptyAndAttached,
+    /// Only merge empty namespaces.
+    /// \code
+    ///   namespace a {}
+    /// \endcode
+    SNS_Empty,
+    /// Merge all namespaces that fit on a single line.
+    /// \code
+    ///   namespace a { class b; }
+    /// \endcode
+    SNS_Always,
+  };
+
+  /// Dependent on the value, ``namespace a { class b; }`` can be put on a
+  /// single line.
   /// \version 20
-  bool AllowShortNamespacesOnASingleLine;
+  ShortNamespaceStyle AllowShortNamespacesOnASingleLine;
 
   /// Different styles for merging short records (``class``,``struct``, and
   /// ``union``).

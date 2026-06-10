@@ -2560,7 +2560,15 @@ bool UnwrappedLineParser::parseBracedList(bool IsAngleBracket, bool IsEnum) {
     if (FormatTok->is(IsAngleBracket ? tok::greater : tok::r_brace)) {
       if (IsEnum) {
         FormatTok->setBlockKind(BK_Block);
-        if (!Style.AllowShortEnumsOnASingleLine)
+        // An empty enum is kept on a single line for any value but ``Never``;
+        // a non-empty enum is only kept on a single line for ``Always``.
+        const bool IsEmpty =
+            FormatTok->Previous && FormatTok->Previous->is(tok::l_brace);
+        const bool Break =
+            IsEmpty
+                ? Style.AllowShortEnumsOnASingleLine == FormatStyle::SES_Never
+                : Style.AllowShortEnumsOnASingleLine != FormatStyle::SES_Always;
+        if (Break)
           addUnwrappedLine();
       }
       nextToken();
@@ -2616,8 +2624,12 @@ bool UnwrappedLineParser::parseBracedList(bool IsAngleBracket, bool IsEnum) {
       break;
     case tok::comma:
       nextToken();
-      if (IsEnum && !Style.AllowShortEnumsOnASingleLine)
+      // A comma means the enum is non-empty, so it is only kept on a single
+      // line for ``Always``.
+      if (IsEnum &&
+          Style.AllowShortEnumsOnASingleLine != FormatStyle::SES_Always) {
         addUnwrappedLine();
+      }
       break;
     case tok::kw_requires:
       parseRequiresExpression();
@@ -3367,7 +3379,8 @@ void UnwrappedLineParser::parseForOrWhileLoop(bool HasParens) {
   if (Style.isVerilog()) {
     // Event control.
     parseVerilogSensitivityList();
-  } else if (Style.AllowShortLoopsOnASingleLine && FormatTok->is(tok::semi) &&
+  } else if (Style.AllowShortLoopsOnASingleLine != FormatStyle::SLPS_Never &&
+             FormatTok->is(tok::semi) &&
              Tokens->getPreviousToken()->is(tok::r_paren)) {
     nextToken();
     addUnwrappedLine();
@@ -3919,9 +3932,15 @@ bool UnwrappedLineParser::parseEnum() {
   const bool ManageWhitesmithsBraces =
       Style.BreakBeforeBraces == FormatStyle::BS_Whitesmiths;
 
-  if (!Style.AllowShortEnumsOnASingleLine &&
-      ShouldBreakBeforeBrace(Style, InitialToken,
-                             Tokens->peekNextToken()->is(tok::r_brace))) {
+  // An empty enum (``enum {}``) is kept on a single line for any value but
+  // ``Never``; a non-empty enum is only kept on a single line for ``Always``.
+  const bool IsEmptyEnum = Tokens->peekNextToken()->is(tok::r_brace);
+  const bool BreakEnum =
+      IsEmptyEnum
+          ? Style.AllowShortEnumsOnASingleLine == FormatStyle::SES_Never
+          : Style.AllowShortEnumsOnASingleLine != FormatStyle::SES_Always;
+
+  if (BreakEnum && ShouldBreakBeforeBrace(Style, InitialToken, IsEmptyEnum)) {
     addUnwrappedLine();
 
     // If we're in Whitesmiths mode, indent the brace if we're not indenting
@@ -3931,7 +3950,7 @@ bool UnwrappedLineParser::parseEnum() {
   }
   // Parse enum body.
   nextToken();
-  if (!Style.AllowShortEnumsOnASingleLine) {
+  if (BreakEnum) {
     addUnwrappedLine();
     if (!ManageWhitesmithsBraces)
       ++Line->Level;
@@ -3940,7 +3959,7 @@ bool UnwrappedLineParser::parseEnum() {
                                     ? UnwrappedLine::kInvalidIndex
                                     : CurrentLines->size() - 1;
   bool HasError = !parseBracedList(/*IsAngleBracket=*/false, /*IsEnum=*/true);
-  if (!Style.AllowShortEnumsOnASingleLine && !ManageWhitesmithsBraces)
+  if (BreakEnum && !ManageWhitesmithsBraces)
     --Line->Level;
   if (HasError) {
     if (FormatTok->is(tok::semi))
