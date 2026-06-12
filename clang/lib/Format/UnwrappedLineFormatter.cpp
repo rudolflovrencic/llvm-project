@@ -1013,9 +1013,14 @@ private:
         if (I[1]->Last->is(TT_LineComment))
           return 0;
         do {
-          if (Tok->isOneOf(tok::l_brace, tok::r_brace) &&
-              Tok->isNot(BK_BracedInit)) {
-            return 0;
+          if (Tok->isOneOf(tok::l_brace, tok::r_brace)) {
+            // For a closing brace, check the kind of its opening brace. A
+            // brace closing a block opened on a previous line has no matching
+            // brace on this line.
+            const FormatToken *Open =
+                Tok->is(tok::l_brace) ? Tok : Tok->MatchingParen;
+            if (!Open || Open->isNot(BK_BracedInit))
+              return 0;
           }
           Tok = Tok->Next;
         } while (Tok);

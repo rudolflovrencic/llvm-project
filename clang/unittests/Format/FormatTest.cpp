@@ -1836,6 +1836,9 @@ TEST_F(FormatTest, ShortControlStatementsOverrideShortBlocks) {
   verifyFormat("if (b) {}", Style);
   verifyFormat("while (b) { --b; }", Style);
   verifyFormat("for (;;) { f(); }", Style);
+  // Braced initializers in the block don't prevent merging.
+  verifyFormat("if (b) { return Foo{b}; }", Style);
+  verifyFormat("while (b) { f(Bar{1, 2}, std::string{\"ab\"}); }", Style);
   verifyFormat("if (b) { return; }",
                "if (b)\n"
                "{\n"
