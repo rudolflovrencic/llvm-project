@@ -231,6 +231,19 @@ public:
   }
 
 private:
+  /// Returns whether the construct-specific ``AllowShort*`` option permits
+  /// merging the control statement that \p Tok begins. These options override
+  /// ``AllowShortBlocksOnASingleLine`` for the blocks of their constructs.
+  bool allowShortControlStatement(const FormatToken &Tok) const {
+    if (Tok.is(tok::kw_if)) {
+      return Style.AllowShortIfStatementsOnASingleLine !=
+             FormatStyle::SIS_Never;
+    }
+    if (Tok.isOneOf(tok::kw_while, tok::kw_for, TT_ForEachMacro))
+      return Style.AllowShortLoopsOnASingleLine;
+    return false;
+  }
+
   /// Calculates how many lines can be merged into 1 starting at \p I.
   unsigned
   tryFitMultipleLinesInOne(LevelIndentTracker &IndentTracker,
@@ -445,7 +458,9 @@ private:
         (FirstNonComment->isOneOf(tok::kw_if, tok::kw_while, tok::kw_for,
                                   TT_ForEachMacro) ||
          TheLine->startsWithExportBlock())) {
-      return Style.AllowShortBlocksOnASingleLine != FormatStyle::SBS_Never
+      return Style.AllowShortBlocksOnASingleLine != FormatStyle::SBS_Never ||
+                     (TheLine->Last->is(TT_ControlStatementLBrace) &&
+                      allowShortControlStatement(*FirstNonComment))
                  ? tryMergeSimpleBlock(I, E, Limit)
                  : 0;
     }
@@ -888,12 +903,20 @@ private:
         (Style.AllowShortBlocksOnASingleLine == FormatStyle::SBS_Empty &&
          I[1]->First->isNot(tok::r_brace));
 
+    // Whether the construct-specific AllowShort* option permits merging the
+    // control statement that begins on this line, overriding
+    // AllowShortBlocksOnASingleLine. The line either ends with the block's
+    // left brace or is followed by a line starting with the wrapped brace.
+    const auto *LBrace = Line.Last->is(tok::l_brace) ? Line.Last : I[1]->First;
+    const bool MergeShortStatement = LBrace->is(TT_ControlStatementLBrace) &&
+                                     allowShortControlStatement(*Line.First);
+
     if (IsCtrlStmt(Line) ||
         Line.First->isOneOf(tok::kw_try, tok::kw___try, tok::kw_catch,
                             tok::kw___finally, tok::r_brace,
                             Keywords.kw___except) ||
         Line.startsWithExportBlock()) {
-      if (IsSplitBlock)
+      if (IsSplitBlock && !MergeShortStatement)
         return 0;
       // Don't merge when we can't except the case when
       // the control statement block is empty
@@ -944,7 +967,9 @@ private:
 
       if (IsSplitBlock && Line.First == Line.Last &&
           I > AnnotatedLines.begin() &&
-          (I[-1]->endsWith(tok::kw_else) || IsCtrlStmt(*I[-1]))) {
+          (I[-1]->endsWith(tok::kw_else) || IsCtrlStmt(*I[-1])) &&
+          !(Line.First->is(TT_ControlStatementLBrace) &&
+            allowShortControlStatement(*I[-1]->First))) {
         return 0;
       }
       FormatToken *Tok = I[1]->First;
@@ -1031,7 +1056,8 @@ private:
 
       auto TryMergeBlock = [&] {
         if (Style.AllowShortBlocksOnASingleLine != FormatStyle::SBS_Never ||
-            Style.AllowShortRecordOnASingleLine == FormatStyle::SRS_Always) {
+            Style.AllowShortRecordOnASingleLine == FormatStyle::SRS_Always ||
+            MergeShortStatement) {
           return true;
         }
         return I[1]->First == I[1]->Last && I + 2 != E &&
